@@ -9,12 +9,13 @@ const {
   updateContact,
   updateStatusContact,
 } = require("../../controllers");
+const { getCurrent } = require("../../middlewares");
 
-router.get("/", listContacts);
-router.get("/:contactId", getContactById);
-router.post("/", addContact);
-router.delete("/:contactId", removeContact);
-router.put("/:contactId", updateContact);
-router.patch("/:contactId/favorite", updateStatusContact);
+router.get("/", getCurrent, listContacts);
+router.get("/:contactId", getCurrent, getContactById);
+router.post("/", getCurrent, addContact);
+router.delete("/:contactId", getCurrent, removeContact);
+router.put("/:contactId", getCurrent, updateContact);
+router.patch("/:contactId/favorite", getCurrent, updateStatusContact);
 
 module.exports = { contactsRouter: router };

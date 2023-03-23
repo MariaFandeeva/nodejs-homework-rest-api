@@ -1,6 +1,6 @@
 const { Contact } = require("../models");
 
-const { HttpError, ctrlWrapper } = require("../utils");
+const { HttpError, ctrlWrapper } = require("../middlewares");
 
 const {
   contactPostValidator,
@@ -9,7 +9,29 @@ const {
 } = require("../schemasJoi");
 
 const listContacts = async (req, res) => {
-  const result = await Contact.find({});
+  const { _id } = req.user;
+  const { page = 1, limit = 20, favorite, name, phone } = req.query;
+  const skip = (page - 1) * limit;
+
+  const searchParams = { owner: _id };
+
+  if (favorite) {
+    searchParams.favorite = favorite;
+  }
+
+  if (name) {
+    searchParams.name = name;
+  }
+
+  if (phone) {
+    searchParams.phone = phone;
+  }
+
+  const result = await Contact.find(searchParams)
+    .skip(skip)
+    .limit(Number(limit))
+    .sort("name")
+    .populate("owner", "_id email subscription");
   return res.status(200).json(result);
 };
 
@@ -35,8 +57,15 @@ const removeContact = async (req, res) => {
 const addContact = async (req, res) => {
   const { error } = contactPostValidator(req.body);
   if (error) return res.status(400).json({ message: "missing required field" });
+  const { _id } = req.user;
   const { name, email, phone, favorite } = req.body;
-  const contact = await Contact.create({ name, email, phone, favorite });
+  const contact = await Contact.create({
+    name,
+    email,
+    phone,
+    favorite,
+    owner: _id,
+  });
   if (contact) return res.status(201).json(contact);
 };
 
@@ -53,7 +82,7 @@ const updateContact = async (req, res) => {
   if (contact) {
     res.status(200).json(contact);
   } else {
-    res.status(404).json({ message: "Not foubd" });
+    res.status(404).json({ message: "Not found" });
   }
 };
 
