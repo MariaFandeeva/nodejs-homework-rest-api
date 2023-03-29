@@ -6,6 +6,7 @@ const {
 
 const {
   userRegJoiSchema,
+  userVerifyJoiSchema,
   userLoginJoiSchema,
   userUpdateSchema,
 } = require("./validator.js/userValidation");
@@ -15,6 +16,7 @@ module.exports = {
   contactPutValidator,
   favoriteJoiSchema,
   userRegJoiSchema,
+  userVerifyJoiSchema,
   userLoginJoiSchema,
   userUpdateSchema,
 };
