@@ -1,6 +1,6 @@
 const { Contact } = require("../models");
 
-const { HttpError, ctrlWrapper } = require("../middlewares");
+const { ctrlWrapper } = require("../middlewares");
 
 const {
   contactPostValidator,
@@ -40,14 +40,17 @@ const getContactById = async (req, res) => {
   const contact = await Contact.findById(contactId);
 
   if (!contact) {
-    throw HttpError(404, "Not found");
+    return res.status(404).json({ message: "Not found" });
   }
   res.status(200).json(contact);
 };
 
 const removeContact = async (req, res) => {
   const { contactId } = req.params;
-  const contactToRemove = await Contact.findByIdAndRemove(contactId);
+  const contactToRemove = await Contact.findByIdAndRemove({
+    contactId,
+    owner: req.user._id,
+  });
   if (!contactToRemove) {
     res.status(404).json({ message: "Contact not found" });
   }
